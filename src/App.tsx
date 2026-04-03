@@ -38,6 +38,43 @@ import { feature } from 'topojson-client';
 import { cn } from './lib/utils';
 import { MAP_SOURCES, QUESTIONS, MapScope, MapType, Question, RIVER_SOURCES, LAKE_SOURCES } from './data/maps';
 
+const getGeoId = (geo: any) => {
+  if (!geo) return "";
+  const p = geo.properties || {};
+  return (
+    geo.id ||
+    p.id ||
+    p.ISO_A3 ||
+    p.ST_NM ||
+    p.district ||
+    p.NAME_1 ||
+    p.name ||
+    p.name_en ||
+    p.NAME ||
+    p.Name ||
+    p.name_alt ||
+    geo.rsmKey ||
+    ""
+  );
+};
+
+const getGeoName = (geo: any, fallback = "Unknown Region") => {
+  if (!geo) return fallback;
+  const p = geo.properties || {};
+  return (
+    p.name ||
+    p.NAME ||
+    p.ST_NM ||
+    p.district ||
+    p.NAME_1 ||
+    p.name_en ||
+    p.NAME_EN ||
+    p.Name ||
+    p.name_alt ||
+    fallback
+  );
+};
+
 const RegionLabel = memo(({ geo, name, scope }: { geo: any, name: string, scope: string }) => {
   const { projection } = useMapContext();
   if (!projection) return null;
@@ -202,8 +239,8 @@ const GeographyList = memo(({
   return (
     <>
       {geographies.map((geo: any) => {
-        const geoId = geo.id || geo.properties?.id || geo.properties?.ISO_A3 || geo.properties?.ST_NM || geo.properties?.district || geo.properties?.NAME_1 || geo.rsmKey;
-        const geoName = geo.properties?.name || geo.properties?.NAME || geo.properties?.ST_NM || geo.properties?.district || geo.properties?.NAME_1 || "Unknown Region";
+        const geoId = getGeoId(geo);
+        const geoName = getGeoName(geo);
         const isSelected = selectedGeoId === geoId;
         const isHovered = hoveredGeoId === geoId;
         
@@ -251,8 +288,7 @@ const RiverList = memo(({
   return (
     <>
       {geographies.map((geo: any) => {
-        const p = geo.properties || {};
-        const name = p.name || p.name_en || p.NAME || p.Name || p.name_alt || "River";
+        const name = getGeoName(geo, "River");
         const isSelected = selectedGeoId === name;
         return (
           <g key={geo.rsmKey}>
@@ -288,8 +324,7 @@ const LakeList = memo(({
   return (
     <>
       {geographies.map((geo: any) => {
-        const p = geo.properties || {};
-        const name = p.name || p.name_en || p.NAME || p.Name || "Lake";
+        const name = getGeoName(geo, "Lake");
         const isSelected = selectedGeoId === name;
         return (
           <g key={geo.rsmKey}>
@@ -374,8 +409,8 @@ export default function App() {
           }
 
           const generatedQuestions = features.map((geo: any, index: number) => {
-            const geoId = geo.id || geo.properties?.id || geo.properties?.ISO_A3 || geo.properties?.ST_NM || geo.properties?.district || geo.properties?.NAME_1 || `geo-${index}`;
-            const geoName = geo.properties?.name || geo.properties?.NAME || geo.properties?.ST_NM || geo.properties?.district || geo.properties?.NAME_1 || "Unknown Region";
+            const geoId = getGeoId(geo) || `geo-${index}`;
+            const geoName = getGeoName(geo);
 
             return {
               id: `dyn-${geoId}-${index}`,
@@ -505,8 +540,7 @@ export default function App() {
         if (isMounted) {
           const riverQuestions = allRiverFeatures.map((geo: any, index: number) => {
             const geoId = getGeoId(geo);
-            const p = geo.properties || {};
-            const geoName = p.name || p.name_en || p.NAME || p.Name || p.name_alt || "Unknown River";
+            const geoName = getGeoName(geo, "Unknown River");
             return {
               id: `dyn-river-${geoId}-${index}`,
               text: `Locate the ${geoName}`,
@@ -518,8 +552,7 @@ export default function App() {
 
           const lakeQuestions = allLakeFeatures.map((geo: any, index: number) => {
             const geoId = getGeoId(geo);
-            const p = geo.properties || {};
-            const geoName = p.name || p.name_en || p.NAME || p.Name || "Unknown Lake";
+            const geoName = getGeoName(geo, "Unknown Lake");
             return {
               id: `dyn-lake-${geoId}-${index}`,
               text: `Locate ${geoName}`,
@@ -638,7 +671,7 @@ export default function App() {
 
   const processAnswer = useCallback((geo: any) => {
     const geoId = getGeoId(geo);
-    const geoName = geo.properties?.name || geo.properties?.NAME || geo.properties?.ST_NM || geo.properties?.district || geo.properties?.NAME_1 || geo.properties?.name_en || geo.properties?.NAME_EN;
+    const geoName = getGeoName(geo);
 
     setSelectedGeoId(geoId);
 
@@ -713,11 +746,6 @@ export default function App() {
         setTimeout(() => setShowConfetti(false), 5000);
       }
     }, 2500);
-  };
-
-  const getGeoId = (geo: any) => {
-    const p = geo.properties || {};
-    return geo.id || p.id || p.ISO_A3 || p.ST_NM || p.district || p.NAME_1 || p.name || p.name_en || p.NAME || p.Name || p.name_alt;
   };
 
   const submitQuiz = () => {
