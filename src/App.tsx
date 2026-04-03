@@ -722,16 +722,19 @@ export default function App() {
 
   const submitQuiz = () => {
     if (gameStatus !== 'playing') return;
-    
+
+    // Create lookup maps for performance
+    const riverMap = type === 'rivers' ? new Map(riverData?.features?.map((f: any) => [getGeoId(f), f])) : null;
+    const lakeMap = type === 'rivers' ? new Map(lakeData?.features?.map((f: any) => [getGeoId(f), f])) : null;
+    const mapFeatMap = type !== 'rivers' ? new Map(mapData?.features?.map((f: any) => [getGeoId(f), f])) : null;
+
     // Find all correct geographies for all questions in the current quiz
     const allLabels = currentQuestions.map(q => {
       let foundGeo = null;
       if (type === 'rivers') {
-        const riverFeat = riverData?.features?.find((f: any) => getGeoId(f) === q.targetId);
-        const lakeFeat = lakeData?.features?.find((f: any) => getGeoId(f) === q.targetId);
-        foundGeo = riverFeat || lakeFeat;
+        foundGeo = riverMap?.get(q.targetId) || lakeMap?.get(q.targetId);
       } else {
-        foundGeo = mapData?.features?.find((f: any) => getGeoId(f) === q.targetId);
+        foundGeo = mapFeatMap?.get(q.targetId);
       }
       return { id: q.targetId, name: q.targetName, geo: foundGeo };
     }).filter(l => l.geo);
