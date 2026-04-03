@@ -1,0 +1,7 @@
+{
+  "name": "UPSC Map Master",
+  "description": "A gamified map learning platform for UPSC aspirants, featuring physical, political, and climatic maps of the World, India, and Odisha.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
