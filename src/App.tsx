@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import ReactConfetti from 'react-confetti';
 import { feature } from 'topojson-client';
-import { cn } from './lib/utils';
+import { cn, shuffle } from './lib/utils';
 import { MAP_SOURCES, QUESTIONS, MapScope, MapType, Question, RIVER_SOURCES, LAKE_SOURCES } from './data/maps';
 
 const getGeoId = (geo: any) => {
@@ -421,7 +421,7 @@ export default function App() {
             };
           }).filter(q => q.targetName !== "Unknown Region" && q.targetName.trim() !== "");
 
-          const shuffled = [...generatedQuestions].sort(() => Math.random() - 0.5);
+          const shuffled = shuffle([...generatedQuestions]);
           setDynamicQuestions(shuffled);
           
           setIsLoading(false);
@@ -565,7 +565,7 @@ export default function App() {
           const combined = [...riverQuestions, ...lakeQuestions]
             .filter(q => q.targetName !== "Unknown River" && q.targetName !== "Unknown Lake" && q.targetName.trim() !== "");
           
-          const shuffled = combined.sort(() => Math.random() - 0.5);
+          const shuffled = shuffle(combined);
           setDynamicQuestions(shuffled);
           setIsLoading(false);
         }
