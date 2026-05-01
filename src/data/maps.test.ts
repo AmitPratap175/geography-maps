@@ -1,8 +1,35 @@
 import assert from 'node:assert';
-import { QUESTIONS, MapScope, MapType } from './maps.js';
+import { QUESTIONS, MapScope, MapType, MAP_SOURCES, RIVER_SOURCES, LAKE_SOURCES } from './maps.js';
 
 const VALID_MAP_TYPES: MapType[] = ["political", "physical", "climatic", "capitals", "rivers"];
 const VALID_MAP_SCOPES: MapScope[] = ["world", "asia", "africa", "europe", "north-america", "south-america", "oceania", "india", "odisha"];
+
+function validateSources() {
+  // Validate MAP_SOURCES
+  for (const scope of VALID_MAP_SCOPES) {
+    const url = MAP_SOURCES[scope];
+    assert.ok(url, `Missing MAP_SOURCES for scope: ${scope}`);
+    assert.ok(url.startsWith('https://'), `Invalid URL for MAP_SOURCES[${scope}]: ${url}`);
+  }
+
+  // Validate RIVER_SOURCES
+  for (const scope in RIVER_SOURCES) {
+    const s = scope as MapScope;
+    assert.ok(VALID_MAP_SCOPES.includes(s), `Invalid MapScope in RIVER_SOURCES: ${s}`);
+    const url = RIVER_SOURCES[s];
+    assert.ok(url && url.startsWith('https://'), `Invalid URL for RIVER_SOURCES[${s}]: ${url}`);
+  }
+
+  // Validate LAKE_SOURCES
+  for (const scope in LAKE_SOURCES) {
+    const s = scope as MapScope;
+    assert.ok(VALID_MAP_SCOPES.includes(s), `Invalid MapScope in LAKE_SOURCES: ${s}`);
+    const url = LAKE_SOURCES[s];
+    assert.ok(url && url.startsWith('https://'), `Invalid URL for LAKE_SOURCES[${s}]: ${url}`);
+  }
+
+  console.log('✅ All Source configuration validation tests passed!');
+}
 
 function validateQuestions() {
   const ids = new Set<string>();
@@ -40,6 +67,7 @@ function validateQuestions() {
 }
 
 try {
+  validateSources();
   validateQuestions();
 } catch (error) {
   console.error('❌ Validation failed:');
