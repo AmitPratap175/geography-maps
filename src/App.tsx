@@ -212,12 +212,19 @@ const POLITICAL_COLORS = [
   "#D8B4FE", // purple-300
 ];
 
+const POLITICAL_COLOR_CACHE = new Map<string, string>();
+
 const getPoliticalColor = (name: string) => {
+  if (POLITICAL_COLOR_CACHE.has(name)) {
+    return POLITICAL_COLOR_CACHE.get(name)!;
+  }
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return POLITICAL_COLORS[Math.abs(hash) % POLITICAL_COLORS.length];
+  const color = POLITICAL_COLORS[Math.abs(hash) % POLITICAL_COLORS.length];
+  POLITICAL_COLOR_CACHE.set(name, color);
+  return color;
 };
 
 const GeographyList = memo(({ 
